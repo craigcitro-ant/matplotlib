@@ -5,7 +5,9 @@ import os
 from pathlib import Path
 from PIL import Image
 import shutil
+import subprocess
 import sys
+from unittest import mock
 import warnings
 
 import numpy as np
@@ -345,3 +347,14 @@ def test_donot_cache_tracebacks():
     for obj in gc.get_objects():
         if isinstance(obj, SomeObject):
             pytest.fail("object from inner stack still alive")
+
+
+def test_fclist_disable():
+    with mock.patch.dict('os.environ', {'_MPLSKIPFCLIST': '1'}):
+        with mock.patch.object(subprocess, 'check_output', wraps=subprocess.check_output) as mock_check_output:
+            findSystemFonts(fontext='ttf')
+        assert mock_check_output.call_count == 0
+
+    with mock.patch.object(subprocess, 'check_output', wraps=subprocess.check_output) as mock_check_output:
+        findSystemFonts(fontext='ttf')
+    assert mock_check_output.call_count == 2

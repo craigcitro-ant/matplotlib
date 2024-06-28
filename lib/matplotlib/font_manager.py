@@ -252,6 +252,8 @@ def _get_win32_installed_fonts():
 @lru_cache
 def _get_fontconfig_fonts():
     """Cache and list the font paths known to ``fc-list``."""
+    if os.environ.get('_MPLSKIPFCLIST', ''):
+        return []
     try:
         if b'--format' not in subprocess.check_output(['fc-list', '--help']):
             _log.warning(  # fontconfig 2.7 implemented --format.
